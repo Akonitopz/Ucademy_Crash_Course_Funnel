@@ -590,13 +590,6 @@ export default function App() {
         <div className="uc-eyebrow">Two minutes</div>
         <h2 style={{ marginBottom: 20 }}>Check your child's place</h2>
         <Quiz />
-        <div className="uc-note">
-          <b>Still open.</b> Price isn't stated anywhere on the page yet. The Friday dates need
-          confirming with Usman, since he wrote the 22nd and 29th but those are Saturdays this year.
-          The ad says fifteen days and the confirmed schedule shows ten, so one of the two needs to
-          change. Quiz answers still aren't stored or sent anywhere, and the Meta pixel, booking event
-          and Appointment Setter webhook are all still to do.
-        </div>
       </div>
 
       <div className="uc-wrap uc-foot">Ucademy — GCSE Crash Course, August 2026.</div>
