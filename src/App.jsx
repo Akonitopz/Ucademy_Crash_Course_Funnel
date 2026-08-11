@@ -15,9 +15,9 @@ const C = {
    Each file must be shared as "anyone with the link" or the embed
    shows a sign-in wall to everyone but you. */
 const TESTIMONIALS = [
-  { id: "19wCVV9hd0tqzFrfi7XaywMfineNZoArd", caption: "Parent — subject and grade movement" },
-  { id: "1JqT1sN1EUbTZtRTCO0sgPJDmObImBPnJ", caption: "Parent — subject and grade movement" },
-  { id: "1JGCDMfxmIIO9ugqfxEI8aKoFwLcL6i2m", caption: "Parent — subject and grade movement" },
+  { id: "19wCVV9hd0tqzFrfi7XaywMfineNZoArd", caption: "" },
+  { id: "1JqT1sN1EUbTZtRTCO0sgPJDmObImBPnJ", caption: "" },
+  { id: "1JGCDMfxmIIO9ugqfxEI8aKoFwLcL6i2m", caption: "" },
 ];
 
 /* Strict routing. Only a student going into Year 11 this September gets the
