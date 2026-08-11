@@ -11,12 +11,15 @@ const C = {
   coral: "#fc8a7b", red: "#e84b37", rule: "#e6e2dc", muted: "#6b6560",
 };
 
-/* One entry per testimonial video. id is the Google Drive file ID. */
+/* One entry per testimonial video. id is the Google Drive file ID.
+   Each file must be shared as "anyone with the link" or the embed
+   shows a sign-in wall to everyone but you. */
 const TESTIMONIALS = [
   { id: "19wCVV9hd0tqzFrfi7XaywMfineNZoArd", caption: "Parent — subject and grade movement" },
   { id: "1JqT1sN1EUbTZtRTCO0sgPJDmObImBPnJ", caption: "Parent — subject and grade movement" },
   { id: "1JGCDMfxmIIO9ugqfxEI8aKoFwLcL6i2m", caption: "Parent — subject and grade movement" },
 ];
+
 /* Strict routing. Only a student going into Year 11 this September gets the
    crash course link. Everyone else goes to the main consultation. */
 const BOOKING_URL = "https://learn.ucademy.co.uk/book/---free-consultation-with-ucademy--crash-course";
@@ -24,6 +27,8 @@ const CONSULT_URL = "https://learn.ucademy.co.uk/book/free-consultation-with-uca
 
 /* Same creative as the ad. Replace with a hosted mp4 before paid traffic. */
 const VSL_URL = "https://drive.google.com/file/d/1SvNEcS3sydlr5EfCrgV86crq0hdasnPN/preview";
+
+const TRUSTPILOT_URL = "https://www.trustpilot.com/review/ucademy.co.uk";
 
 /* Capacity, per Usman. Update this number as spaces go, or the claim stops
    being true and becomes a scarcity problem rather than a scarcity signal. */
@@ -50,6 +55,8 @@ const CSS = `
 .uc p { margin: 0 0 14px; font-size: 16.5px; color: ${C.ink}; }
 
 .uc-marks { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: ${C.muted}; }
+.uc-trust { color: ${C.muted}; text-decoration: underline; text-underline-offset: 3px; }
+.uc-trust:hover { color: ${C.ink}; }
 .uc-qnum { font-family: 'Space Mono', monospace; font-size: 12px; font-weight: 700; color: ${C.red}; border: 1.5px solid ${C.red}; border-radius: 3px; padding: 1px 7px; display: inline-block; margin-bottom: 12px; }
 .uc-hl { background: linear-gradient(180deg, transparent 52%, ${C.yellow} 52%, ${C.yellow} 94%, transparent 94%); padding: 0 2px; }
 .uc-sec { padding: 46px 0; border-top: 1px solid ${C.rule}; }
@@ -113,9 +120,6 @@ const CSS = `
 .uc-list li::before { content: "\\2713"; position: absolute; left: 2px; top: 12px; color: ${C.red}; font-weight: 700; }
 
 .uc-tbc { display: inline-block; background: ${C.yellow}; color: ${C.ink}; font-family: 'Space Mono', monospace; font-size: 10.5px; letter-spacing: 0.06em; padding: 2px 6px; border-radius: 3px; margin-left: 6px; }
-
-.uc-quote { border-left: 3px solid ${C.coral}; padding: 4px 0 4px 16px; margin: 0 0 20px; }
-.uc-quote cite { display: block; margin-top: 6px; font-size: 13.5px; color: ${C.muted}; font-style: normal; }
 
 .uc-faq { border-bottom: 1px solid ${C.rule}; }
 .uc-faq:first-of-type { border-top: 1px solid ${C.rule}; }
@@ -501,15 +505,12 @@ export default function App() {
         <button id="hero-cta" className="uc-btn" style={{ marginTop: 22 }} onClick={goQuiz}>
           Save my child's place
         </button>
-      <p className="uc-marks" style={{ textAlign: "center", marginTop: 14 }}>
-          <a>href="https://www.trustpilot.com/review/ucademy.co.uk"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ color: C.muted, textDecoration: "underline", textUnderlineOffset: 3 }}
-          ★★★★★ 4.9 on Trustpilot
-        </a>
-      </p>
-  </div>
+        <p className="uc-marks" style={{ textAlign: "center", marginTop: 14 }}>
+          <a className="uc-trust" href={TRUSTPILOT_URL} target="_blank" rel="noopener noreferrer">
+            ★★★★★ 4.9 on Trustpilot
+          </a>
+        </p>
+      </div>
 
       {/* VIDEO */}
       <div className="uc-wrap uc-sec" style={{ borderTop: "none", paddingTop: 34 }}>
@@ -571,6 +572,11 @@ export default function App() {
             </div>
           ))}
         </div>
+        <p className="uc-marks" style={{ marginTop: 18, textAlign: "center" }}>
+          <a className="uc-trust" href={TRUSTPILOT_URL} target="_blank" rel="noopener noreferrer">
+            Read every review on Trustpilot
+          </a>
+        </p>
       </div>
 
       {/* FAQ */}
