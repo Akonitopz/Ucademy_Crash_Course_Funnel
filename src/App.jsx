@@ -11,6 +11,14 @@ const C = {
   coral: "#fc8a7b", red: "#e84b37", rule: "#e6e2dc", muted: "#6b6560",
 };
 
+/* Live booking page on Ucademy's own LMS. Both branches point here for now —
+   if Usman provides a separate crash course link, only this line changes. */
+const BOOKING_URL = "https://learn.ucademy.co.uk/book/---free-consultation-with-ucademy--crash-course";
+
+/* Same creative as the ad. Drive /preview is the embeddable form of the URL.
+   Replace with a hosted mp4 before this takes paid traffic. */
+const VSL_URL = "https://drive.google.com/file/d/1SvNEcS3sydlr5EfCrgV86crq0hdasnPN/preview";
+
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Karla:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap');
 
@@ -40,11 +48,12 @@ const CSS = `
 .uc-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   width: 100%; padding: 16px 22px; border: none; border-radius: 6px;
-  background: ${C.red}; color: #fff; cursor: pointer;
+  background: ${C.red}; color: #fff; cursor: pointer; text-decoration: none;
   font-family: 'Bricolage Grotesque', sans-serif; font-size: 17px; font-weight: 700;
   transition: transform .12s ease, background .12s ease;
 }
-.uc-btn:hover { background: #d13f2c; transform: translateY(-1px); }
+.uc-btn:hover { background: #d13f2c; transform: translateY(-1px); color: #fff; }
+.uc-btn:visited { color: #fff; }
 .uc-btn:disabled { background: ${C.rule}; color: ${C.muted}; cursor: not-allowed; transform: none; }
 .uc-btn:focus-visible, .uc-opt:focus-visible, .uc-input:focus-visible, .uc-sticky button:focus-visible { outline: 3px solid ${C.mint}; outline-offset: 2px; }
 
@@ -73,7 +82,11 @@ const CSS = `
 .uc-legend span { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: ${C.muted}; }
 .uc-swatch { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
 
-.uc-video { border: 1.5px dashed ${C.ink}; border-radius: 8px; aspect-ratio: 16/9; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: #faf8f5; text-align: center; padding: 20px; }
+.uc-video { position: relative; aspect-ratio: 16/9; border: 1.5px solid ${C.ink}; border-radius: 8px; overflow: hidden; background: ${C.ink}; }
+.uc-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+
+.uc-book { border: 1.5px solid ${C.rule}; border-radius: 8px; overflow: hidden; margin: 18px 0 16px; height: 620px; background: #faf8f5; }
+.uc-book iframe { width: 100%; height: 100%; border: none; display: block; }
 
 .uc-list { list-style: none; padding: 0; margin: 0; }
 .uc-list li { padding: 12px 0 12px 30px; border-bottom: 1px solid ${C.rule}; position: relative; font-size: 16.5px; }
@@ -100,7 +113,7 @@ const CSS = `
 .uc-opt { width: 100%; text-align: left; padding: 14px 16px; margin-bottom: 9px; border: 1.5px solid ${C.rule}; border-radius: 6px; background: #fff; cursor: pointer; font-family: 'Karla', sans-serif; font-size: 16.5px; color: ${C.ink}; display: flex; justify-content: space-between; align-items: center; gap: 10px; transition: border-color .12s ease, background .12s ease; }
 .uc-opt:hover { border-color: ${C.ink}; }
 .uc-opt.sel { border-color: ${C.red}; background: #fff6f4; font-weight: 700; }
-.uc-back { background: none; border: none; color: ${C.muted}; cursor: pointer; font-family: 'Space Mono', monospace; font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; padding: 12px 0 0; }
+.uc-back { background: none; border: none; color: ${C.muted}; cursor: pointer; font-family: 'Space Mono', monospace; font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; padding: 12px 0 0; display: block; }
 .uc-bar { height: 6px; background: ${C.rule}; border-radius: 4px; overflow: hidden; margin: 20px 0 10px; }
 .uc-bar i { display: block; height: 100%; background: ${C.red}; }
 
@@ -294,10 +307,16 @@ function Quiz() {
         <>
           <h2 style={{ marginBottom: 12 }}>{a.name}, there's a place for your child on the August course.</h2>
           <p>Pick a time below and we'll talk through what your child needs, confirm their place and send the session dates. Sessions run across August, so every day you wait is a session they miss.</p>
-          <div style={{ border: "1.5px dashed " + C.rule, borderRadius: 8, padding: "26px 16px", textAlign: "center", background: "#faf8f5", margin: "18px 0 16px" }}>
-            <p className="uc-marks" style={{ margin: 0 }}>Calendly embed goes here</p>
+          <div className="uc-book">
+            <iframe
+              src={BOOKING_URL}
+              title="Book your call with Ucademy"
+              loading="lazy"
+            />
           </div>
-          <button className="uc-btn" onClick={next}>Confirm my child's place</button>
+          <a className="uc-btn" href={BOOKING_URL} target="_blank" rel="noopener noreferrer" onClick={next}>
+            Open the booking page
+          </a>
           <button className="uc-back" onClick={reset}>↺ Start again</button>
         </>
       )}
@@ -305,8 +324,10 @@ function Quiz() {
         <>
           <h2 style={{ marginBottom: 12 }}>{a.name}, the crash course isn't the right fit.</h2>
           <p>It's built specifically for students going into Year 11. For {a.year.toLowerCase()}, a free grade boosting consultation will be more use. We'll look at where they are now and what to work on.</p>
-          <button className="uc-btn" onClick={next}>Book a free consultation instead</button>
-          <p className="uc-hint" style={{ marginTop: 14, marginBottom: 0 }}>This branch routes to the evergreen consultation funnel, not the crash course calendar.</p>
+          <a className="uc-btn" href={BOOKING_URL} target="_blank" rel="noopener noreferrer" onClick={next}>
+            Book a free consultation instead
+          </a>
+          <p className="uc-hint" style={{ marginTop: 14, marginBottom: 0 }}>This branch currently shares the crash course booking link. Swap it once the evergreen consultation funnel has its own.</p>
           <button className="uc-back" onClick={reset}>↺ Start again</button>
         </>
       )}
@@ -329,7 +350,7 @@ function Quiz() {
             <li>Watch the short video we've emailed you, it saves ten minutes on the call</li>
             <li>Add the calendar invite so it doesn't get lost</li>
           </ul>
-          <p className="uc-hint" style={{ marginBottom: 0 }}>Prototype only — nothing was submitted and no place is reserved.</p>
+          <p className="uc-hint" style={{ marginBottom: 0 }}>Prototype only — the booking itself happens on the Ucademy page that opened in a new tab.</p>
           <button className="uc-back" onClick={reset}>↺ Start again</button>
         </>
       )}
@@ -410,10 +431,16 @@ export default function App() {
       {/* VIDEO */}
       <div className="uc-wrap uc-sec" style={{ borderTop: "none", paddingTop: 34 }}>
         <div className="uc-video">
-          <span className="uc-marks">VSL — same creative as the ad</span>
-          <span style={{ fontSize: 14, color: C.muted }}>Autoplay muted, captions on</span>
+          <iframe
+            src={VSL_URL}
+            title="Usman explains the August crash course"
+            allow="autoplay"
+            allowFullScreen
+          />
         </div>
-        <p className="uc-marks" style={{ marginTop: 10, textAlign: "center" }}>Usman explains the course in 60 seconds</p>
+        <p className="uc-marks" style={{ marginTop: 10, textAlign: "center" }}>
+          Usman explains the course in 60 seconds
+        </p>
       </div>
 
       {/* OFFER */}
@@ -471,11 +498,11 @@ export default function App() {
         <h2 style={{ marginBottom: 20 }}>Check your child's place</h2>
         <Quiz />
         <div className="uc-note">
-          <b>Prototype notes.</b> Nothing here submits, stores or tracks anything. Before this can take
-          real traffic it needs the price and schedule, an answer to the mid-August joiner question, a
-          real Calendly embed, the Meta pixel with a Lead event on the contact step and a separate
-          booking event, and a webhook routing leads to the Appointment Setter chat. The "checking
-          places" screen is only honest if the course genuinely has a cap.
+          <b>Prototype notes.</b> The quiz answers are not stored or sent anywhere yet, and the booking
+          happens entirely on the Ucademy page. Before this can take real traffic it needs the price and
+          schedule, an answer to the mid-August joiner question, the Meta pixel with a Lead event on the
+          contact step and a separate booking event, and a webhook routing leads to the Appointment Setter
+          chat. The "checking places" screen is only honest if the course genuinely has a cap.
         </div>
       </div>
 
