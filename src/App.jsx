@@ -11,6 +11,12 @@ const C = {
   coral: "#fc8a7b", red: "#e84b37", rule: "#e6e2dc", muted: "#6b6560",
 };
 
+/* One entry per testimonial video. id is the Google Drive file ID. */
+const TESTIMONIALS = [
+  { id: "19wCVV9hd0tqzFrfi7XaywMfineNZoArd", caption: "Parent — subject and grade movement" },
+  { id: "1JqT1sN1EUbTZtRTCO0sgPJDmObImBPnJ", caption: "Parent — subject and grade movement" },
+  { id: "1JGCDMfxmIIO9ugqfxEI8aKoFwLcL6i2m", caption: "Parent — subject and grade movement" },
+];
 /* Strict routing. Only a student going into Year 11 this September gets the
    crash course link. Everyone else goes to the main consultation. */
 const BOOKING_URL = "https://learn.ucademy.co.uk/book/---free-consultation-with-ucademy--crash-course";
@@ -95,6 +101,11 @@ const CSS = `
 
 .uc-video { position: relative; aspect-ratio: 16/9; border: 1.5px solid ${C.ink}; border-radius: 8px; overflow: hidden; background: ${C.ink}; }
 .uc-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+.uc-vids { display: grid; gap: 18px; margin-top: 20px; }
+.uc-vid { position: relative; aspect-ratio: 9/16; border: 1.5px solid ${C.ink}; border-radius: 8px; overflow: hidden; background: ${C.ink}; }
+.uc-vid iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+.uc-vid-cap { margin-top: 8px; font-size: 14px; color: ${C.muted}; }
+@media (min-width: 700px) { .uc-vids { grid-template-columns: repeat(3, 1fr); } }
 
 .uc-list { list-style: none; padding: 0; margin: 0; }
 .uc-list li { padding: 12px 0 12px 30px; border-bottom: 1px solid ${C.rule}; position: relative; font-size: 16.5px; }
@@ -490,10 +501,15 @@ export default function App() {
         <button id="hero-cta" className="uc-btn" style={{ marginTop: 22 }} onClick={goQuiz}>
           Save my child's place
         </button>
-        <p className="uc-marks" style={{ textAlign: "center", marginTop: 14 }}>
-          ★★★★★ 4.9 on Trustpilot <span className="uc-tbc">Review count to confirm</span>
-        </p>
-      </div>
+      <p className="uc-marks" style={{ textAlign: "center", marginTop: 14 }}>
+          <a>href="https://www.trustpilot.com/review/ucademy.co.uk"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: C.muted, textDecoration: "underline", textUnderlineOffset: 3 }}
+          ★★★★★ 4.9 on Trustpilot
+        </a>
+      </p>
+  </div>
 
       {/* VIDEO */}
       <div className="uc-wrap uc-sec" style={{ borderTop: "none", paddingTop: 34 }}>
@@ -540,15 +556,19 @@ export default function App() {
       <div className="uc-wrap uc-sec">
         <div className="uc-eyebrow">Proof</div>
         <h2>Parents who have been here before</h2>
-        <div style={{ marginTop: 20 }}>
-          {[1, 2, 3].map((i) => (
-            <blockquote className="uc-quote" key={i}>
-              <span className="uc-tbc">Trustpilot widget goes here</span>
-              <p style={{ margin: "8px 0 0", color: C.muted }}>
-                Live reviews pulled from Ucademy's Trustpilot profile, rather than quotes copied by hand.
-              </p>
-              <cite>Parent review</cite>
-            </blockquote>
+        <div className="uc-vids">
+          {TESTIMONIALS.map((t) => (
+            <div key={t.id}>
+              <div className="uc-vid">
+                <iframe
+                  src={"https://drive.google.com/file/d/" + t.id + "/preview"}
+                  title={t.caption}
+                  allow="autoplay"
+                  allowFullScreen
+                />
+              </div>
+              <p className="uc-vid-cap">{t.caption}</p>
+            </div>
           ))}
         </div>
       </div>
