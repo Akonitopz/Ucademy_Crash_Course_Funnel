@@ -112,7 +112,6 @@ const CSS = `
 .uc-vid { position: relative; aspect-ratio: 16/9; border: 1.5px solid ${C.ink}; border-radius: 8px; overflow: hidden; background: ${C.ink}; }
 .uc-vid iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
 .uc-vid-cap { margin-top: 8px; font-size: 14px; color: ${C.muted}; }
-@media (min-width: 700px) { .uc-vids { grid-template-columns: repeat(3, 1fr); } }
 
 .uc-list { list-style: none; padding: 0; margin: 0; }
 .uc-list li { padding: 12px 0 12px 30px; border-bottom: 1px solid ${C.rule}; position: relative; font-size: 16.5px; }
