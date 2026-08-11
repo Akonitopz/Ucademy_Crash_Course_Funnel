@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 /* ------------------------------------------------------------------ */
 /*  Ucademy — GCSE Crash Course, August 2026                            */
 /*  One page funnel. Sell above, qualify below.                         */
-/*  PROTOTYPE — nothing submits, stores or tracks.                      */
+/*  Copy and schedule confirmed by Usman, 12 August.                    */
 /* ------------------------------------------------------------------ */
 
 const C = {
@@ -11,13 +11,17 @@ const C = {
   coral: "#fc8a7b", red: "#e84b37", rule: "#e6e2dc", muted: "#6b6560",
 };
 
-/* Live booking page on Ucademy's own LMS. Both branches point here for now —
-   if Usman provides a separate crash course link, only this line changes. */
+/* Strict routing. Only a student going into Year 11 this September gets the
+   crash course link. Everyone else goes to the main consultation. */
 const BOOKING_URL = "https://learn.ucademy.co.uk/book/---free-consultation-with-ucademy--crash-course";
+const CONSULT_URL = "https://learn.ucademy.co.uk/book/free-consultation-with-ucademy--main";
 
-/* Same creative as the ad. Drive /preview is the embeddable form of the URL.
-   Replace with a hosted mp4 before this takes paid traffic. */
+/* Same creative as the ad. Replace with a hosted mp4 before paid traffic. */
 const VSL_URL = "https://drive.google.com/file/d/1SvNEcS3sydlr5EfCrgV86crq0hdasnPN/preview";
+
+/* Capacity, per Usman. Update this number as spaces go, or the claim stops
+   being true and becomes a scarcity problem rather than a scarcity signal. */
+const SPACES_LEFT = 50;
 
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Karla:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap');
@@ -44,6 +48,7 @@ const CSS = `
 .uc-hl { background: linear-gradient(180deg, transparent 52%, ${C.yellow} 52%, ${C.yellow} 94%, transparent 94%); padding: 0 2px; }
 .uc-sec { padding: 46px 0; border-top: 1px solid ${C.rule}; }
 .uc-eyebrow { font-family: 'Space Mono', monospace; font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: ${C.muted}; margin-bottom: 14px; }
+.uc-only { display: inline-block; margin-top: 4px; font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: 0.04em; color: ${C.ink}; background: ${C.mint}; padding: 4px 9px; border-radius: 4px; }
 
 .uc-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
@@ -82,11 +87,14 @@ const CSS = `
 .uc-legend span { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: ${C.muted}; }
 .uc-swatch { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
 
+.uc-times { list-style: none; padding: 0; margin: 16px 0 0; border: 1.5px solid ${C.rule}; border-radius: 8px; }
+.uc-times li { display: flex; justify-content: space-between; gap: 14px; padding: 11px 16px; border-bottom: 1px solid ${C.rule}; font-size: 15.5px; }
+.uc-times li:last-child { border-bottom: none; }
+.uc-times b { font-weight: 700; }
+.uc-times span { font-family: 'Space Mono', monospace; font-size: 13px; color: ${C.muted}; white-space: nowrap; }
+
 .uc-video { position: relative; aspect-ratio: 16/9; border: 1.5px solid ${C.ink}; border-radius: 8px; overflow: hidden; background: ${C.ink}; }
 .uc-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
-
-.uc-book { border: 1.5px solid ${C.rule}; border-radius: 8px; overflow: hidden; margin: 18px 0 16px; height: 620px; background: #faf8f5; }
-.uc-book iframe { width: 100%; height: 100%; border: none; display: block; }
 
 .uc-list { list-style: none; padding: 0; margin: 0; }
 .uc-list li { padding: 12px 0 12px 30px; border-bottom: 1px solid ${C.rule}; position: relative; font-size: 16.5px; }
@@ -132,40 +140,77 @@ const CSS = `
 `;
 
 /* ---------------------------- calendar ---------------------------- */
-const TODAY = 10;
-const SESSION_DAYS = [3, 4, 5, 6, 7, 10, 11, 12, 13, 14, 17, 18, 19, 20, 21];
+/* Confirmed by Usman: Mon to Thu 11am-3pm in the weeks of the 17th and 24th,
+   plus the Friday of each week 10am-12pm. More sessions added if needed.
+   NOTE: Usman wrote "22nd Friday" and "29nd Friday", but in 2026 those dates
+   fall on Saturdays. Day names are used here, so Fridays are the 21st and 28th.
+   Confirm with him before this goes to paid traffic. */
+const SESSION_DAYS = [17, 18, 19, 20, 21, 24, 25, 26, 27, 28];
+
+const SCHEDULE = [
+  { label: "Mon 17 to Thu 20 August", time: "11am – 3pm" },
+  { label: "Fri 21 August", time: "10am – 12pm" },
+  { label: "Mon 24 to Thu 27 August", time: "11am – 3pm" },
+  { label: "Fri 28 August", time: "10am – 12pm" },
+];
+
+/* Aug 2026 starts on a Saturday, so a Monday-first grid needs 5 blanks. */
+const LEAD_BLANKS = 5;
+
+function todayInAugust2026() {
+  const n = new Date();
+  return n.getFullYear() === 2026 && n.getMonth() === 7 ? n.getDate() : 0;
+}
 
 function Calendar() {
+  const today = todayInAugust2026();
   const days = Array.from({ length: 31 }, (_, i) => i + 1);
   return (
     <div>
       <div className="uc-cal">
         <div className="uc-cal-top">
           <span>August 2026</span>
-          <span>{SESSION_DAYS.filter((d) => d >= TODAY).length} sessions left</span>
+          <span>{SPACES_LEFT} spaces remaining</span>
         </div>
         <div className="uc-cal-grid">
           {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => <div className="uc-dow" key={i}>{d}</div>)}
-          {Array.from({ length: 5 }).map((_, i) => <div className="uc-day plain" key={"b" + i} />)}
+          {Array.from({ length: LEAD_BLANKS }).map((_, i) => <div className="uc-day plain" key={"b" + i} />)}
           {days.map((d) => {
             const s = SESSION_DAYS.includes(d);
-            const cls = ["uc-day", s && d < TODAY ? "gone" : "", s && d >= TODAY ? "live" : "", !s ? "plain" : "", d === TODAY ? "today" : ""].filter(Boolean).join(" ");
+            const cls = ["uc-day", s && d < today ? "gone" : "", s && d >= today ? "live" : "", !s ? "plain" : "", d === today ? "today" : ""].filter(Boolean).join(" ");
             return <div className={cls} key={d}>{d}</div>;
           })}
         </div>
       </div>
       <div className="uc-legend">
-        <span><i className="uc-swatch" style={{ background: C.mint }} /> Sessions still to come</span>
+        <span><i className="uc-swatch" style={{ background: C.mint }} /> Session days</span>
         <span><i className="uc-swatch" style={{ background: "#f3f1ee" }} /> Already run</span>
       </div>
-      <p className="uc-marks" style={{ marginTop: 12 }}>Dates illustrative — confirm the real schedule before launch</p>
+      <ul className="uc-times">
+        {SCHEDULE.map((s) => (
+          <li key={s.label}><b>{s.label}</b><span>{s.time}</span></li>
+        ))}
+        <li><b>More sessions added if needed</b></li>
+      </ul>
     </div>
   );
 }
 
 /* ------------------------------ quiz ------------------------------ */
 const digits = (s) => s.replace(/\D/g, "");
-const YEARS = ["Year 11", "Year 10", "Year 9", "Already finished, resitting"];
+
+/* Year the child is going INTO this September. Only "Year 11" qualifies. */
+const YEARS = ["Year 11", "Year 12", "Year 10", "Year 9", "Already finished, resitting"];
+
+/* How each option reads mid-sentence, so the copy doesn't say
+   "for already finished, resitting, a free consultation…" */
+const YEAR_PHRASE = {
+  "Year 12": "a student going into Year 12",
+  "Year 10": "a student going into Year 10",
+  "Year 9": "a student going into Year 9",
+  "Already finished, resitting": "a student resitting",
+};
+
 const SUBJECTS = ["Maths", "English Language", "English Literature", "Biology", "Chemistry", "Physics"];
 const GRADES = ["Mostly 1 to 3", "Mostly 4 to 5", "Mostly 6 to 7", "Grade 8 to 9, aiming higher", "Not sure yet"];
 const TOTAL = 7;
@@ -214,7 +259,9 @@ function Quiz() {
     return () => clearInterval(t);
   }, [step]);
 
+  /* Strict: going into Year 11 and nothing else. */
   const fit = a.year === "Year 11";
+  const bookingLink = fit ? BOOKING_URL : CONSULT_URL;
 
   return (
     <div className="uc-quiz" id="quiz">
@@ -238,7 +285,7 @@ function Quiz() {
         </Screen>
       )}
       {step === 2 && (
-        <Screen at={2} tag="Question 3 of 3" title="What grades did they finish Year 10 on?" onBack={back}>
+        <Screen at={2} tag="Question 3 of 3" title="What grades are they working at now?" onBack={back}>
           {GRADES.map((g) => (
             <button key={g} className={"uc-opt" + (a.grades === g ? " sel" : "")} onClick={() => { set("grades", g); next(); }}>{g}</button>
           ))}
@@ -253,8 +300,8 @@ function Quiz() {
           </h3>
           <p style={{ color: C.muted, marginBottom: 4 }}>
             {fit
-              ? "Students going into Year 11 with gaps in " + a.subjects.slice(0, 2).join(" and ").toLowerCase() + " are who Usman designed these fifteen sessions around."
-              : "The crash course is built for students going into Year 11, so we'll point you somewhere more useful in a moment."}
+              ? "Students going into Year 11 with gaps in " + a.subjects.slice(0, 2).join(" and ").toLowerCase() + " are who Usman designed this course around."
+              : "The August crash course is only for students going into Year 11, so we'll point you somewhere more useful in a moment."}
           </p>
           <div className="uc-recap">
             <dl>
@@ -276,11 +323,11 @@ function Quiz() {
         </Screen>
       )}
       {step === 5 && (
-        <Screen at={5} tag="Almost done" title={"Thanks, " + a.name + ". Where should we send the August dates?"} onBack={back}>
+        <Screen at={5} tag="Almost done" title={"Thanks, " + a.name + ". What's your email address?"} onBack={back}>
           <input className="uc-input" type="email" placeholder="Email address" maxLength={80} value={a.email}
             onChange={(e) => set("email", e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && a.email.includes("@") && next()} />
-          <p className="uc-hint">We'll only use this to send the session dates and confirm the place.</p>
+          <p className="uc-hint">We'll only use this to confirm the call and send the details.</p>
           <button className="uc-btn" disabled={!a.email.includes("@")} onClick={next}>Continue</button>
         </Screen>
       )}
@@ -290,7 +337,7 @@ function Quiz() {
             placeholder="Mobile number" value={a.phone}
             onChange={(e) => set("phone", e.target.value.replace(/[^\d+ ]/g, ""))}
             onKeyDown={(e) => e.key === "Enter" && digits(a.phone).length >= 10 && next()} />
-          <p className="uc-hint">We'll only use this to confirm your child's place and send the session dates.</p>
+          <p className="uc-hint">We'll only use this to confirm the call and send the details.</p>
           <button className="uc-btn" disabled={digits(a.phone).length < 10} onClick={next}>
             {fit ? "Check my child's place" : "See what fits"}
           </button>
@@ -298,53 +345,62 @@ function Quiz() {
       )}
       {step === 7 && (
         <div style={{ textAlign: "center", padding: "26px 0" }}>
-          <h3>Checking places left on the August course…</h3>
+          <h3>{fit ? "Checking spaces left on the August course…" : "Finding the right option…"}</h3>
           <div className="uc-bar"><i style={{ width: pct + "%" }} /></div>
           <p className="uc-marks">{pct}%</p>
         </div>
       )}
+
+      {/* Going into Year 11 — the crash course */}
       {step === 8 && fit && (
         <>
           <h2 style={{ marginBottom: 12 }}>{a.name}, there's a place for your child on the August course.</h2>
-          <p>Pick a time below and we'll talk through what your child needs, confirm their place and send the session dates. Sessions run across August, so every day you wait is a session they miss.</p>
-
-          <a className="uc-btn" href={BOOKING_URL} target="_blank" rel="noopener noreferrer" onClick={next}>
-            Open the booking page
+          <p>Tap below to pick a time. We'll talk through what your child needs, confirm their place and send the session details. The course runs from 17 August, so every day you wait is a session they miss.</p>
+          <a className="uc-btn" href={bookingLink} target="_blank" rel="noopener noreferrer" onClick={next}>
+            Pick a time for the call
           </a>
           <button className="uc-back" onClick={reset}>↺ Start again</button>
         </>
       )}
+
+      {/* Everyone else — main consultation */}
       {step === 8 && !fit && (
         <>
           <h2 style={{ marginBottom: 12 }}>{a.name}, the crash course isn't the right fit.</h2>
-          <p>It's built specifically for students going into Year 11. For {a.year.toLowerCase()}, a free grade boosting consultation will be more use. We'll look at where they are now and what to work on.</p>
-          <a className="uc-btn" href={BOOKING_URL} target="_blank" rel="noopener noreferrer" onClick={next}>
+          <p>
+            It's built specifically for students going into Year 11 this September. For{" "}
+            {YEAR_PHRASE[a.year] || "your child"}, a free consultation will be more use. We'll look at
+            where they are now, what to work on, and which Ucademy course actually suits them.
+          </p>
+          <a className="uc-btn" href={bookingLink} target="_blank" rel="noopener noreferrer" onClick={next}>
             Book a free consultation instead
           </a>
-          <p className="uc-hint" style={{ marginTop: 14, marginBottom: 0 }}>This branch currently shares the crash course booking link. Swap it once the evergreen consultation funnel has its own.</p>
           <button className="uc-back" onClick={reset}>↺ Start again</button>
         </>
       )}
+
       {step === 9 && (
         <>
-          <span className="uc-qnum">Confirmed</span>
-          <h2 style={{ marginBottom: 12 }}>You're booked, {a.name}.</h2>
-          <p>We've sent a confirmation to {a.email} and we'll text {a.phone} if anything changes.</p>
+          <span className="uc-qnum">Nearly there</span>
+          <h2 style={{ marginBottom: 12 }}>Finish booking in the tab that just opened, {a.name}.</h2>
+          <p>Nothing is held until you've picked a time. If the tab didn't open, use the link below.</p>
           <div className="uc-recap">
             <dl>
               <div><dt>Child's year</dt><dd>{a.year}</dd></div>
               <div><dt>Subjects</dt><dd>{a.subjects.join(", ")}</dd></div>
               <div><dt>Current grades</dt><dd>{a.grades}</dd></div>
-              <div><dt>Course</dt><dd>August crash course</dd></div>
+              <div><dt>Booking</dt><dd>{fit ? "August crash course" : "Free consultation"}</dd></div>
             </dl>
           </div>
           <h3 style={{ marginBottom: 10 }}>Before the call</h3>
           <ul className="uc-list" style={{ marginBottom: 18 }}>
             <li>Have their latest report or mock results to hand</li>
-            <li>Watch the short video we've emailed you, it saves ten minutes on the call</li>
+            <li>Know which subjects worry you most, so we can go straight to them</li>
             <li>Add the calendar invite so it doesn't get lost</li>
           </ul>
-          <p className="uc-hint" style={{ marginBottom: 0 }}>Prototype only — the booking itself happens on the Ucademy page that opened in a new tab.</p>
+          <a className="uc-btn" href={bookingLink} target="_blank" rel="noopener noreferrer">
+            Reopen the booking page
+          </a>
           <button className="uc-back" onClick={reset}>↺ Start again</button>
         </>
       )}
@@ -353,12 +409,28 @@ function Quiz() {
 }
 
 /* ------------------------------- FAQ ------------------------------ */
+/* Answers below are Usman's own words, lightly tidied. */
 const FAQS = [
-  { q: "It's already mid-August. Has my child missed too much?", a: "Needs an answer from Usman. Recordings, a catch-up session, or a stated cut-off date all work here. Nothing does not — this is the first thing a parent landing today will ask.", flag: true },
-  { q: "What if the sessions clash with our holiday?", a: "Say plainly whether recordings are available.", flag: true },
-  { q: "Is this group or one to one?", a: "Small group, live and interactive. Confirm the group size.", flag: true },
-  { q: "Which exam board does it cover?", a: "To confirm.", flag: true },
-  { q: "What happens after August?", a: "Your child leaves with a written plan for September onwards.", flag: false },
+  {
+    q: "It's already mid-August. Has my child missed too much?",
+    a: "No. As long as they're willing to put in the work, I'll personally make sure they've covered all of the content, A to Z, in a few weeks.",
+  },
+  {
+    q: "What if the sessions clash with our holiday?",
+    a: "This course is intensive, and it's for families who want the content finished before Year 11 starts properly. If that's your goal, some things are going to need to be cut. That said, you can still log on from anywhere with internet. Give it a few hours in the day, make sure you've done the work being covered, and then crack on and enjoy the pina colada on the beach.",
+  },
+  {
+    q: "Which exam board does it cover?",
+    a: "All of them. We cover every exam board, both GCSE and IGCSE.",
+  },
+  {
+    q: "My child isn't going into Year 11. Can they still join?",
+    a: "No. The crash course is only for students going into Year 11 this September. Everyone else is pointed to a free consultation to find the right course.",
+  },
+  {
+    q: "What happens after the course ends?",
+    a: "Your child leaves with a written plan for September onwards. For now, focus on one step at a time.",
+  },
 ];
 
 function Faq() {
@@ -370,7 +442,7 @@ function Faq() {
           <button onClick={() => setOpen(open === i ? -1 : i)} aria-expanded={open === i}>
             <span>{f.q}</span><span style={{ color: C.red }}>{open === i ? "\u2212" : "+"}</span>
           </button>
-          {open === i && <div>{f.flag && <span className="uc-tbc">To confirm</span>} {f.a}</div>}
+          {open === i && <div>{f.a}</div>}
         </div>
       ))}
     </div>
@@ -406,19 +478,20 @@ export default function App() {
 
       {/* HERO */}
       <div className="uc-wrap" style={{ paddingTop: 44 }}>
-        <div className="uc-eyebrow">Starting now · Running all August · Taught by Usman</div>
+        <div className="uc-eyebrow">Starts 17 August · Taught by Usman</div>
         <h1>Year 10 going into<br />Year 11 this September?</h1>
         <p style={{ fontSize: 18, marginTop: 18 }}>
           After three years of parents asking, the GCSE crash course is back.
-          <span className="uc-hl"> Fifteen sessions across August</span> to close the gaps your child
-          carried out of Year 10, then a plan for how they hit top grades from September.
+          <span className="uc-hl"> Intensive live sessions from 17 August</span> to cover the content
+          your child carried out of Year 10, then a plan for how they hit top grades from September.
         </p>
+        <span className="uc-only">For students going into Year 11 only</span>
         <Calendar />
         <button id="hero-cta" className="uc-btn" style={{ marginTop: 22 }} onClick={goQuiz}>
           Save my child's place
         </button>
         <p className="uc-marks" style={{ textAlign: "center", marginTop: 14 }}>
-          ★★★★★ 4.9 from 800+ reviews on Trustpilot <span className="uc-tbc">Verify</span>
+          ★★★★★ 4.9 on Trustpilot <span className="uc-tbc">Review count to confirm</span>
         </p>
       </div>
 
@@ -440,13 +513,14 @@ export default function App() {
       {/* OFFER */}
       <div className="uc-wrap uc-sec">
         <div className="uc-eyebrow">What it is</div>
-        <h2>Fifteen sessions. One goal. Walk into Year 11 ahead instead of behind.</h2>
+        <h2>The whole GCSE, covered before Year 11 starts.</h2>
         <ul className="uc-list" style={{ marginTop: 20 }}>
-          <li>Fifteen live sessions across August, taught by Usman personally</li>
-          <li>Every session targets the Year 10 content most students carry forward as gaps</li>
+          <li>Live sessions across the second half of August, taught by Usman personally</li>
+          <li>We cover the full maths GCSE, which takes months in a normal programme, in just a few weeks</li>
           <li>A written plan for September, so your child starts Year 11 knowing what to work on</li>
-          <li>Small group, live and interactive. Not a recorded course nobody opens</li>
-          <li style={{ color: C.muted }}>Price, session times and group size <span className="uc-tbc">Needed from Usman</span></li>
+          <li>Live and interactive, taught by one of the most in demand tutors in the country</li>
+          <li>Every exam board covered, GCSE and IGCSE</li>
+          <li>Open only to students going into Year 11 this September</li>
         </ul>
       </div>
 
@@ -455,11 +529,11 @@ export default function App() {
         <div className="uc-eyebrow">Who's teaching it</div>
         <h2>Why Usman</h2>
         <p style={{ marginTop: 16 }}>
-          I'm Usman. I studied engineering at Oxford and Birmingham, and I run Ucademy.
-          <span className="uc-hl"> I'm teaching this course myself</span>, not handing it to a tutor.
-          Parents have asked me to run it again every year since we stopped, and this August I finally am.
+          I'm Usman. I studied engineering at the University of Oxford and the University of Birmingham,
+          and I run Ucademy.<span className="uc-hl"> I'm teaching this course myself</span>, not handing
+          it to a tutor. Parents have asked me to run it again every year since we stopped, and this
+          August I finally am.
         </p>
-        <p className="uc-marks">Confirm the exact wording of the credentials before launch</p>
       </div>
 
       {/* PROOF */}
@@ -469,11 +543,11 @@ export default function App() {
         <div style={{ marginTop: 20 }}>
           {[1, 2, 3].map((i) => (
             <blockquote className="uc-quote" key={i}>
-              <span className="uc-tbc">Real testimonial needed</span>
+              <span className="uc-tbc">Trustpilot widget goes here</span>
               <p style={{ margin: "8px 0 0", color: C.muted }}>
-                Short quote naming the subject and the grade movement. Generic five-star praise won't do the same work here.
+                Live reviews pulled from Ucademy's Trustpilot profile, rather than quotes copied by hand.
               </p>
-              <cite>Parent, Year {10 + (i % 2)} — subject</cite>
+              <cite>Parent review</cite>
             </blockquote>
           ))}
         </div>
@@ -492,15 +566,15 @@ export default function App() {
         <h2 style={{ marginBottom: 20 }}>Check your child's place</h2>
         <Quiz />
         <div className="uc-note">
-          <b>Prototype notes.</b> The quiz answers are not stored or sent anywhere yet, and the booking
-          happens entirely on the Ucademy page. Before this can take real traffic it needs the price and
-          schedule, an answer to the mid-August joiner question, the Meta pixel with a Lead event on the
-          contact step and a separate booking event, and a webhook routing leads to the Appointment Setter
-          chat. The "checking places" screen is only honest if the course genuinely has a cap.
+          <b>Still open.</b> Price isn't stated anywhere on the page yet. The Friday dates need
+          confirming with Usman, since he wrote the 22nd and 29th but those are Saturdays this year.
+          The ad says fifteen days and the confirmed schedule shows ten, so one of the two needs to
+          change. Quiz answers still aren't stored or sent anywhere, and the Meta pixel, booking event
+          and Appointment Setter webhook are all still to do.
         </div>
       </div>
 
-      <div className="uc-wrap uc-foot">Ucademy — GCSE Crash Course, August 2026. Prototype for internal review.</div>
+      <div className="uc-wrap uc-foot">Ucademy — GCSE Crash Course, August 2026.</div>
 
       {/* sticky mobile CTA */}
       <div className={"uc-sticky" + (sticky ? " show" : "")}>
