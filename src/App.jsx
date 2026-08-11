@@ -55,7 +55,7 @@ const CSS = `
 .uc p { margin: 0 0 14px; font-size: 16.5px; color: ${C.ink}; }
 
 .uc-marks { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: ${C.muted}; }
-.uc-trust { color: ${C.muted}; text-decoration: underline; text-underline-offset: 3px; }
+.uc-trust { color: red; text-decoration: underline; text-underline-offset: 3px; }
 .uc-trust:hover { color: ${C.ink}; }
 .uc-qnum { font-family: 'Space Mono', monospace; font-size: 12px; font-weight: 700; color: ${C.red}; border: 1.5px solid ${C.red}; border-radius: 3px; padding: 1px 7px; display: inline-block; margin-bottom: 12px; }
 .uc-hl { background: linear-gradient(180deg, transparent 52%, ${C.yellow} 52%, ${C.yellow} 94%, transparent 94%); padding: 0 2px; }
