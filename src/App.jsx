@@ -109,7 +109,7 @@ const CSS = `
 .uc-video { position: relative; aspect-ratio: 16/9; border: 1.5px solid ${C.ink}; border-radius: 8px; overflow: hidden; background: ${C.ink}; }
 .uc-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
 .uc-vids { display: grid; gap: 18px; margin-top: 20px; }
-.uc-vid { position: relative; aspect-ratio: 9/16; border: 1.5px solid ${C.ink}; border-radius: 8px; overflow: hidden; background: ${C.ink}; }
+.uc-vid { position: relative; aspect-ratio: 16/9; border: 1.5px solid ${C.ink}; border-radius: 8px; overflow: hidden; background: ${C.ink}; }
 .uc-vid iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
 .uc-vid-cap { margin-top: 8px; font-size: 14px; color: ${C.muted}; }
 @media (min-width: 700px) { .uc-vids { grid-template-columns: repeat(3, 1fr); } }
