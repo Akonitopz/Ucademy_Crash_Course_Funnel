@@ -307,13 +307,7 @@ function Quiz() {
         <>
           <h2 style={{ marginBottom: 12 }}>{a.name}, there's a place for your child on the August course.</h2>
           <p>Pick a time below and we'll talk through what your child needs, confirm their place and send the session dates. Sessions run across August, so every day you wait is a session they miss.</p>
-          <div className="uc-book">
-            <iframe
-              src={BOOKING_URL}
-              title="Book your call with Ucademy"
-              loading="lazy"
-            />
-          </div>
+
           <a className="uc-btn" href={BOOKING_URL} target="_blank" rel="noopener noreferrer" onClick={next}>
             Open the booking page
           </a>
