@@ -28,7 +28,7 @@ const BOOKING_URL = "https://learn.ucademy.co.uk/book/---free-consultation-with-
 const CONSULT_URL = "https://learn.ucademy.co.uk/book/free-consultation-with-ucademy--main";
 
 /* Same creative as the ad. Replace with a hosted mp4 before paid traffic. */
-const VSL_URL = "https://drive.google.com/file/d/1pmK9E2wV9o0yeLUvIAa1ZxNsD_HW-QYB/view?usp=sharing";
+const VSL_URL = "https://drive.google.com/file/d/1pmK9E2wV9o0yeLUvIAa1ZxNsD_HW-QYB/preview";
 
 const TRUSTPILOT_URL = "https://www.trustpilot.com/review/ucademy.co.uk";
 
