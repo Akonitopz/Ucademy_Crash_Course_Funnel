@@ -14,10 +14,12 @@ const C = {
 /* One entry per testimonial video. id is the Google Drive file ID.
    Each file must be shared as "anyone with the link" or the embed
    shows a sign-in wall to everyone but you. */
+
 const TESTIMONIALS = [
-  { id: "19wCVV9hd0tqzFrfi7XaywMfineNZoArd", caption: "" },
-  { id: "1JqT1sN1EUbTZtRTCO0sgPJDmObImBPnJ", caption: "" },
-  { id: "1JGCDMfxmIIO9ugqfxEI8aKoFwLcL6i2m", caption: "" },
+  { id: "1e_Fxad0rXhiTVSOg_8aUDVTX7uMAUzEI", caption: "" },
+  { id: "1fgwu2p09XwWmgwwdsu3mmLCmlXAz54HY", caption: "" },
+  { id: "1freL_TMGunIH8moQCTr5kkjOm6e8XE2o", caption: "" },
+  { id: "1k2sPpKT9URjpyYO2KswCppsN1IXn4IuR", caption: "" },
 ];
 
 /* Strict routing. Only a student going into Year 11 this September gets the
@@ -26,7 +28,7 @@ const BOOKING_URL = "https://learn.ucademy.co.uk/book/---free-consultation-with-
 const CONSULT_URL = "https://learn.ucademy.co.uk/book/free-consultation-with-ucademy--main";
 
 /* Same creative as the ad. Replace with a hosted mp4 before paid traffic. */
-const VSL_URL = "https://drive.google.com/file/d/1SvNEcS3sydlr5EfCrgV86crq0hdasnPN/preview";
+const VSL_URL = "https://drive.google.com/file/d/1pmK9E2wV9o0yeLUvIAa1ZxNsD_HW-QYB/view?usp=sharing";
 
 const TRUSTPILOT_URL = "https://www.trustpilot.com/review/ucademy.co.uk";
 
@@ -555,7 +557,7 @@ export default function App() {
       {/* PROOF */}
       <div className="uc-wrap uc-sec">
         <div className="uc-eyebrow">Proof</div>
-        <h2>Parents who have been here before</h2>
+        <h2>Students who have been here before</h2>
         <div className="uc-vids">
           {TESTIMONIALS.map((t) => (
             <div key={t.id}>
