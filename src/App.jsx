@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 /*  Ucademy — GCSE Crash Course, August 2026                            */
 /*  One page funnel. Sell above, qualify below.                         */
 /*  Copy and schedule confirmed by Usman, 12 August.                    */
+/*  Meta pixel events added 13 August: Lead on contact submit,          */
+/*  Schedule on booking click.                                          */
 /* ------------------------------------------------------------------ */
 
 const C = {
@@ -35,6 +37,47 @@ const TRUSTPILOT_URL = "https://www.trustpilot.com/review/ucademy.co.uk";
 /* Capacity, per Usman. Update this number as spaces go, or the claim stops
    being true and becomes a scarcity problem rather than a scarcity signal. */
 const SPACES_LEFT = 50;
+
+/* ------------------------- lead capture --------------------------- */
+/* PASTE A URL HERE AND LEADS START SAVING. Until this is filled in, no
+   name, email or phone from this funnel is stored anywhere. A Google
+   Apps Script web app URL or a Zapier / Make webhook both work. Left
+   empty, saveLead() no-ops and the funnel behaves exactly as before. */
+const LEAD_WEBHOOK_URL = "";
+
+async function saveLead(answers) {
+  if (!LEAD_WEBHOOK_URL) return;
+  try {
+    await fetch(LEAD_WEBHOOK_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({
+        ...answers,
+        subjects: answers.subjects.join(", "),
+        source: "ucademy_funnel_f1",
+        submittedAt: new Date().toISOString(),
+      }),
+    });
+  } catch (err) {
+    /* Never block the parent from reaching the booking page. */
+    console.error("Lead save failed", err);
+  }
+}
+
+/* --------------------------- meta pixel --------------------------- */
+/* The base pixel is already installed sitewide, so this only fires the
+   events. eventID is passed now so the same events can be deduplicated
+   later when the Conversions API is wired up server side. */
+const track = (event, params) => {
+  try {
+    const eventID =
+      window.crypto?.randomUUID?.() || String(Date.now()) + Math.random().toString(16).slice(2);
+    window.fbq?.("track", event, params, { eventID });
+  } catch (err) {
+    console.error("Pixel event failed", event, err);
+  }
+};
 
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Karla:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap');
@@ -258,11 +301,14 @@ function Quiz() {
   const [step, setStep] = useState(0);
   const [a, setA] = useState(EMPTY);
   const [pct, setPct] = useState(0);
+  /* Guards against a double fire if someone taps the button twice or hits
+     Enter and clicks. Meta would otherwise count two leads for one parent. */
+  const [sent, setSent] = useState(false);
 
   const set = (k, v) => setA((p) => ({ ...p, [k]: v }));
   const next = () => setStep((s) => s + 1);
   const back = () => setStep((s) => s - 1);
-  const reset = () => { setA(EMPTY); setStep(0); };
+  const reset = () => { setA(EMPTY); setStep(0); setSent(false); };
   const toggle = (s) => setA((p) => ({ ...p, subjects: p.subjects.includes(s) ? p.subjects.filter((x) => x !== s) : [...p.subjects, s] }));
 
   useEffect(() => {
@@ -278,6 +324,27 @@ function Quiz() {
   /* Strict: going into Year 11 and nothing else. */
   const fit = a.year === "Year 11";
   const bookingLink = fit ? BOOKING_URL : CONSULT_URL;
+
+  /* Fires once, at the last point the parent hands over data. Saves the
+     lead and tells Meta a conversion happened, then advances. */
+  const submitContact = () => {
+    if (sent) { next(); return; }
+    setSent(true);
+    saveLead(a);
+    track("Lead", {
+      content_name: "GCSE Crash Course Aug26",
+      content_category: a.year,
+      qualified: fit,
+    });
+    next();
+  };
+
+  /* Fires on the click through to the booking system. Kept separate from
+     Lead so bookings can be optimised for on their own once volume allows. */
+  const goBooking = () => {
+    track("Schedule", { content_name: fit ? "Crash course" : "Consultation" });
+    next();
+  };
 
   return (
     <div className="uc-quiz" id="quiz">
@@ -352,9 +419,9 @@ function Quiz() {
           <input className="uc-input" type="tel" inputMode="numeric" maxLength={16}
             placeholder="Mobile number" value={a.phone}
             onChange={(e) => set("phone", e.target.value.replace(/[^\d+ ]/g, ""))}
-            onKeyDown={(e) => e.key === "Enter" && digits(a.phone).length >= 10 && next()} />
+            onKeyDown={(e) => e.key === "Enter" && digits(a.phone).length >= 10 && submitContact()} />
           <p className="uc-hint">We'll only use this to confirm the call and send the details.</p>
-          <button className="uc-btn" disabled={digits(a.phone).length < 10} onClick={next}>
+          <button className="uc-btn" disabled={digits(a.phone).length < 10} onClick={submitContact}>
             {fit ? "Check my child's place" : "See what fits"}
           </button>
         </Screen>
@@ -372,7 +439,7 @@ function Quiz() {
         <>
           <h2 style={{ marginBottom: 12 }}>{a.name}, there's a place for your child on the August course.</h2>
           <p>Tap below to pick a time. We'll talk through what your child needs, confirm their place and send the session details. The course runs from 17 August, so every day you wait is a session they miss.</p>
-          <a className="uc-btn" href={bookingLink} target="_blank" rel="noopener noreferrer" onClick={next}>
+          <a className="uc-btn" href={bookingLink} target="_blank" rel="noopener noreferrer" onClick={goBooking}>
             Pick a time for the call
           </a>
           <button className="uc-back" onClick={reset}>↺ Start again</button>
@@ -388,7 +455,7 @@ function Quiz() {
             {YEAR_PHRASE[a.year] || "your child"}, a free consultation will be more use. We'll look at
             where they are now, what to work on, and which Ucademy course actually suits them.
           </p>
-          <a className="uc-btn" href={bookingLink} target="_blank" rel="noopener noreferrer" onClick={next}>
+          <a className="uc-btn" href={bookingLink} target="_blank" rel="noopener noreferrer" onClick={goBooking}>
             Book a free consultation instead
           </a>
           <button className="uc-back" onClick={reset}>↺ Start again</button>
@@ -414,6 +481,9 @@ function Quiz() {
             <li>Know which subjects worry you most, so we can go straight to them</li>
             <li>Add the calendar invite so it doesn't get lost</li>
           </ul>
+          {/* No pixel event here on purpose. This link is a fallback for
+              people whose tab didn't open, and firing Schedule again would
+              double count them. */}
           <a className="uc-btn" href={bookingLink} target="_blank" rel="noopener noreferrer">
             Reopen the booking page
           </a>
